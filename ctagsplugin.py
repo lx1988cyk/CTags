@@ -9,6 +9,7 @@ import pprint
 import re
 import string
 import threading
+import platform
 
 from contextlib import contextmanager
 from itertools import chain
@@ -712,7 +713,11 @@ class CTagsAutoComplete(sublime_plugin.EventListener):
                 tags = []
                 if (not view.window().folders() or not os.path.exists(tags_path)): #check if a project is open and the .tags file exists
                     return tags
-                f=os.popen("awk '{ print $1 }' '" + tags_path + "'")
+                cmd = 'awk "{ print $1 }" "' + tags_path + '"'
+                if platform.system() == "Windows":
+                    cmd = cmd.replace("'",'"') #for win cmd.exe don't support single quote 
+                
+                f = os.popen(cmd)
                 for i in f.readlines():
                     tags.append([i.strip()])
                 tags = [(item,item) for sublist in tags for item in sublist] #flatten
